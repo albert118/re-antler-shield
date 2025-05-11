@@ -2,6 +2,7 @@ using BepInEx;
 using R2API;
 using R2API.Utils;
 using RoR2;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -22,9 +23,15 @@ public class ReAntlerShield : BaseUnityPlugin
 
     public void Awake()
     {
-        Logger.LogDebug("UpdateItemDef called");
+        CreateItem();
+        GameModeCatalog.availability.CallWhenAvailable(PostLoad);
+    }
 
+    public void CreateItem()
+    {
         _itemDef = ScriptableObject.CreateInstance<ItemDef>();
+
+        LanguageFileLoader.AddLanguageFilesFromMod(this, "languages");
 
         _itemDef.name = "NEGATEATTACK_NAME";
         _itemDef.nameToken = "NEGATEATTACK_NAME";
@@ -53,6 +60,7 @@ public class ReAntlerShield : BaseUnityPlugin
         // NegateAttack asset aka. "Antler Shield"
         // see https://xiaoxiao921.github.io/GithubActionCacheTest/assetPathsDump.html
         // antler shield is no longer an asset, so we load the new "Elusive Antlers" asset instead
+        // this always throws an invalid key exception looking it up - not sure why as it's a listed asset
         var elusiveAntlerItemDef = Addressables
             .LoadAssetAsync<ItemDef>("RoR2/DLC2/Items/SpeedBoostPickup/Items.ElusiveAntlers.asset")
             .WaitForCompletion();
